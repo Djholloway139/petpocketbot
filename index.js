@@ -1,6 +1,6 @@
 const express = require('express');
-const puppeteer = require('puppeteer');
 const bodyParser = require('body-parser');
+const puppeteer = require('puppeteer-core');
 
 const app = express();
 app.use(bodyParser.json());
@@ -21,13 +21,13 @@ app.post('/webhook', async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-  headless: true,
-  args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  executablePath: puppeteer.executablePath()
-});
-
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      executablePath: '/usr/bin/google-chrome-stable' // default Render path
+    });
 
     const page = await browser.newPage();
+
     await page.goto('https://www.petpocketbook.com/login', { waitUntil: 'networkidle2' });
     await page.type('input[name="email"]', USERNAME);
     await page.type('input[name="password"]', PASSWORD);
@@ -39,9 +39,9 @@ app.post('/webhook', async (req, res) => {
     await page.waitForTimeout(2000);
 
     await page.evaluate(() => {
-      const buttons = Array.from(document.querySelectorAll('button'));
-      const inviteBtn = buttons.find(btn => btn.textContent.includes('Invite to join'));
-      if (inviteBtn) inviteBtn.click();
+      const buttons = [...document.querySelectorAll('button')];
+      const invite = buttons.find(b => b.textContent.includes('Invite to join'));
+      if (invite) invite.click();
     });
 
     await page.waitForSelector('input[name="firstName"]', { timeout: 5000 });
@@ -50,9 +50,9 @@ app.post('/webhook', async (req, res) => {
     await page.type('input[name="email"]', email);
 
     await page.evaluate(() => {
-      const buttons = Array.from(document.querySelectorAll('button'));
-      const sendBtn = buttons.find(btn => btn.textContent.includes('Invite'));
-      if (sendBtn) sendBtn.click();
+      const buttons = [...document.querySelectorAll('button')];
+      const invite = buttons.find(b => b.textContent.includes('Invite'));
+      if (invite) invite.click();
     });
 
     await browser.close();
