@@ -21,9 +21,11 @@ app.post('/webhook', async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+  headless: true,
+  args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  executablePath: puppeteer.executablePath()
+});
+
 
     const page = await browser.newPage();
     await page.goto('https://www.petpocketbook.com/login', { waitUntil: 'networkidle2' });
